@@ -1,5 +1,6 @@
 from langchain.chat_models import ChatOpenAI
-from langchain.chains import LLMChain
+from langchain import HuggingFaceHub
+from langchain.chains import LLMChain, ConversationalRetrievalChain
 from langchain.prompts.chat import (
     ChatPromptTemplate,
     SystemMessagePromptTemplate,
@@ -8,11 +9,27 @@ from langchain.prompts.chat import (
 from langchain.memory import ConversationBufferMemory
 
 import textwrap
+import pickle
 from dotenv import find_dotenv, load_dotenv
 import streamlit as st
 
 # load environment variables
 load_dotenv(find_dotenv())
+
+
+def conversation_chain_retrieval(vectorstore):
+    openai = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.2)
+    # llama2_7b = HuggingFaceHub(
+    #     repo_id="meta-llama/Llama-2-7b-chat-hf",
+    #     model_kwargs={"temperature": 0.2, "max_length": 512},
+    # )
+
+    # memory
+    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+    conversation_chain = ConversationalRetrievalChain.from_llm(
+        llm=openai, retriever=vectorstore.as_retriever(), memory=memory
+    )
+    return conversation_chain
 
 
 def get_response_from_query(db, query, k=8):
@@ -27,14 +44,11 @@ def get_response_from_query(db, query, k=8):
 
     # prompt templates
     template = """
-        You are a helpful assistant that that can answer questions about the documents 
-        based on the information in the documents: {docs}
+        You are a helpful assistant that can answer questions about the documents: {docs}
         
-        Only use the factual information from the transcript to answer the question.
+        Only use the factual information from the documents to answer the question.
         
         If you feel like you don't have enough information to answer the question, say "I don't know".
-        
-        Your answers should be verbose and detailed.
         """
 
     system_message_prompt = SystemMessagePromptTemplate.from_template(template)
@@ -47,15 +61,24 @@ def get_response_from_query(db, query, k=8):
         [system_message_prompt, human_message_prompt]
     )
 
-    # memory
-    query_memory = ConversationBufferMemory(
-        input_key="query", memory_key="chat_history"
-    )
-
     # llms
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.2, memory=query_memory)
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.2)
+    # llm = HuggingFaceHub(
+    #     repo_id="meta-llama/Llama-2-13b-chat-hf",
+    #     model_kwargs={"temperature": 0.2, "max_length": 512},
+    #     verbose=True,
+    # )
     chain = LLMChain(llm=llm, prompt=chat_prompt)
 
     response = chain.run(question=query, docs=docs_page_content)
     response = response.replace("\n", "")
-    return response, docs, query_memory.buffer
+    return response, docs
+
+
+if __name__ == "__main__":
+    # load data
+    data_save_time = "2023-07-22_12-09-08"
+    db = pickle.load(open(f"cache_data/db_{data_save_time}.pkl", "rb"))
+    query = "What Weishan did in 2023?"
+    response, docs = get_response_from_query(db, query)
+    print(response)

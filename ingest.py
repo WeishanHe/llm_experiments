@@ -3,6 +3,10 @@ import glob
 from typing import List
 from multiprocessing import Pool
 from tqdm import tqdm
+import logging
+from dotenv import find_dotenv, load_dotenv
+from datetime import datetime
+import pickle
 
 from langchain.document_loaders import (
     CSVLoader,
@@ -18,20 +22,11 @@ from langchain.document_loaders import (
 )
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
-from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.embeddings import OpenAIEmbeddings, HuggingFaceInstructEmbeddings
 
-from dotenv import find_dotenv, load_dotenv
-from datetime import datetime
-import pickle
+from settings import SOURCE_PATH, DATABASE_PATH, embeddings, chunk_size, chunk_overlap
 
-# load environment variables
-load_dotenv(find_dotenv())
-
-source_directory = os.environ.get("SOURCE_DIRECTORY", "source_documents")
-save_directory = os.environ.get("SAVE_DIRECTORY", "cache_data")
-embeddings = OpenAIEmbeddings()
-chunk_size = 500
-chunk_overlap = 50
+logging.basicConfig(level=logging.INFO)
 
 # Map file extensions to document loaders and their arguments
 LOADER_MAPPING = {
@@ -75,44 +70,55 @@ def load_documents(source_dir: str, ignored_files: List[str] = []):
     ]
 
     with Pool(processes=os.cpu_count()) as pool:
-        results = []
+        documents = []
         with tqdm(
             total=len(filtered_files), desc="Loading new documents", ncols=80
         ) as pbar:
             for i, doc in enumerate(
                 pool.imap_unordered(load_single_document, filtered_files)
             ):
-                results.append(doc)
+                documents.append(doc)
                 pbar.update()
 
-    return results
+    return documents
+
+
+def get_text_chunks(documents):
+    text_splitter = RecursiveCharacterTextSplitter(
+        separators=["\n"], chunk_size=chunk_size, chunk_overlap=chunk_overlap
+    )
+    chunks = text_splitter.split_documents(documents)
+    return chunks
+
+
+def get_vectorstore(document_chunks):
+    db = FAISS.from_documents(document_chunks, embeddings)
+    return db
 
 
 def process_documents(ignored_files: List[str] = [], cache: bool = False):
     """
     Load documents and split in chunks
     """
-    print(f"Loading documents from {source_directory}")
-    documents = load_documents(source_directory, ignored_files)
+    logging.info(f"Loading documents from {SOURCE_PATH}")
+    documents = load_documents(SOURCE_PATH, ignored_files)
     if not documents:
         print("No new documents to load")
         exit(0)
-    print(f"Loaded {len(documents)} new documents from {source_directory}")
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=chunk_size, chunk_overlap=chunk_overlap
+    logging.info(f"Loaded {len(documents)} new documents from {SOURCE_PATH}")
+
+    document_chunks = get_text_chunks(documents)
+    logging.info(
+        f"Split into {len(document_chunks)} chunks of text (max. {chunk_size} tokens each)"
     )
-    texts = text_splitter.split_documents(documents)
-    print(f"Split into {len(texts)} chunks of text (max. {chunk_size} tokens each)")
-    db = FAISS.from_documents(texts, embeddings)
-    print(f"Save database to {save_directory}")
+
+    logging.info(f"Creating vectorstore")
+    db = get_vectorstore(document_chunks)
+
+    logging.info(f"Saving database to {DATABASE_PATH}")
     save_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     if cache:
-        pickle.dump(db, open(save_directory + f"/db_{save_time}.pkl", "wb"))
-    return db
-
-
-def read_data(save_time: str):
-    db.save_local(save_directory + f"/db_{save_time}")
+        pickle.dump(db, open(DATABASE_PATH + f"/db_{save_time}.pkl", "wb"))
     return db
 
 
