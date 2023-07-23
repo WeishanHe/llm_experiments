@@ -85,7 +85,7 @@ def load_documents(source_dir: str, ignored_files: List[str] = []):
 
 def get_text_chunks(documents):
     text_splitter = RecursiveCharacterTextSplitter(
-        separators=["\n"], chunk_size=chunk_size, chunk_overlap=chunk_overlap
+        chunk_size=chunk_size, chunk_overlap=chunk_overlap
     )
     chunks = text_splitter.split_documents(documents)
     return chunks

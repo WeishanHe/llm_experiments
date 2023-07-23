@@ -22,4 +22,7 @@ embeddings = OpenAIEmbeddings()
 
 # data preprocessing
 chunk_size = 500
-chunk_overlap = 50
+chunk_overlap = 100
+
+# data version
+data_save_time = "2023-07-23_12-05-35"

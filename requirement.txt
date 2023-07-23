@@ -1,6 +1,7 @@
 python-dotenv
 langchain
 openai
-pypdf
-tiktotoken
-llama-cpp-python
+chromadb
+tiktoken
+faiss-cpu
+streamlit

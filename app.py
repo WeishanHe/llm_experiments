@@ -1,32 +1,23 @@
 import streamlit as st
 import pickle
-import textwrap
 from dotenv import find_dotenv, load_dotenv
-
-from langchain.memory import ConversationBufferMemory
+import os
 
 from chat_bot import get_response_from_query
+from settings import data_save_time
 
 # load environment variables
 load_dotenv(find_dotenv())
 
 # App framework
-st.title("👾 Ask me Anything")
-query = st.text_input("Type your question here")
+st.set_page_config(page_title="Ask Weishan Anything", page_icon="🦥")
+st.header("🦥 Ask me Anything about My Professional Life")
+query = st.text_input("Type your question here, e.g. 'How is Weishan's Python skill?'")
 
-# read data
-data_save_time = "2023-07-22_12-09-08"
+# load database
 db = pickle.load(open(f"cache_data/db_{data_save_time}.pkl", "rb"))
 
 # run model and show response to the screen
 if query:
-    response, docs, query_memory = get_response_from_query(db, query)
+    response, docs = get_response_from_query(db, query)
     st.write(response)
-
-    # st.write('**Documents used:**')
-    # for doc in docs:
-    #     st.write(f'**{doc.title}**')
-    #     st.write(doc.page_content)
-    #     st.write('---')
-    with st.expander("Chat History"):
-        st.info(query_memory)
