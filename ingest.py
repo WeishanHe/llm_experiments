@@ -24,7 +24,13 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
 from langchain.embeddings import OpenAIEmbeddings, HuggingFaceInstructEmbeddings
 
-from settings import SOURCE_PATH, DATABASE_PATH, embeddings, chunk_size, chunk_overlap
+from settings import (
+    SOURCE_PATH,
+    DATABASE_PATH,
+    embeddings,
+    chunk_size,
+    chunk_overlap,
+)
 
 logging.basicConfig(level=logging.INFO)
 
