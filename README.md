@@ -18,7 +18,13 @@ I used Streamlit to build the front-end interface.
 The chatbot is able to answer questions based on my data. However, sometimes it may match the tasks that I did in comapy A to the questions about company B. 
 
 ## Next Steps
-First, I will explore how to deploy
+1. Deploy the model to Streamlit Community Cloud
+I tried to deploy the model to Streamlit Community Cloud but encounter some hurdles. Specifically, when generating the answer, there is a `TypeError: search() missing 3 required positional arguments: 'k', 'distances', and 'labels'`. It seems that it is a common problem encountered by many people. In the ingest.py, I generated a FAISS vectorstore and then pikle the result for later use. That means that I generated the pickle file on the ARM64 architecture and errors happen wehn I try to use the same file on other architectures. I haven't found a solution to this problem yet. I will keep working on it and update the project once I figure it out.
 
+2. Improve the performance
+As mentioned before, the chatbot mixed my experience across different companies. I will try to improve the performance by modifying the data, using other Chains such as `ConversationalRetrievalChain` instead of LLMChain in Langchain, or fine tune soem hyperparameters, etc.
+
+3. Replace OpenAI model with other Open Source models
+I used models from OpenAI in this project. However, OpenAI is not open source and therefore will trigger some costs. I will try to replace the OpenAI model with other open source models such as Llama 2, etc.
 
 
