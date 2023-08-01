@@ -3,11 +3,11 @@
 In this project, I applied LangChain to leverage the power of GPT3.5 to build a chatbot which can answer questions about my profesional life. The front-end interface is powered by Streamlit. You can ask questions like "How is your Python skill?", "Tell me about a time when you use data to generate meaningful insights", etc. The bot will answer your questions based on the materials that I prepared, including resume, project stories, etc.
 
 ## Sample App
-![question1](imgs/do_you_have_experience_in_building_dashboards?.png)
+![question 1](imgs/do_you_have_experience_in_building_dashboards.png)
 
-![question2](imgs/how_is_your_python_skill.png)
+![question 2](imgs/how_is_your_python_skill.png)
 
-![question3](imgs/how_is_your_sql_skll.png)
+![question 3](imgs/how_is_your_sql_skll.png)
 
 ## Model Building
 LangChain is a powerful framework that enables us to develop our LLM-based applications in simple Python code. The whole development process for my chatbot involves the following steps:
