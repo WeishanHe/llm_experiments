@@ -5,7 +5,7 @@ In this project, I applied LangChain to leverage the power of GPT3.5 to build a 
 ## Sample App
 ![question1](imgs/do_you_have_experience_in_building_dashboards?.png)
 
-![question2]](imgs/how_is_your_python_skill.png)
+![question2](imgs/how_is_your_python_skill.png)
 
 ![question3](imgs/how_is_your_sql_skll.png)
 
