@@ -1,6 +1,6 @@
 # Ask Weishan Anything (about her professional life)
 
-In this project, I applied LangChain to leverage the power of GPT3.5 to build a chatbot which can answer questions about my profesional life. The front-end interface is powered by Streamlit. You can ask questions like "How is your Python skill?", "Tell me about a time when you use data to generate meaningful insights", etc. The bot will answer your questions based on the materials that I prepared, including resume, project stories, etc.
+In this project, I applied LangChain to leverage the power of GPT3.5 to build a chatbot which can answer questions about my professional life. The front-end interface is powered by Streamlit. You can ask questions like "How is your Python skill?", "Tell me about a time when you use data to generate meaningful insights", etc. The bot will answer your questions based on the materials that I prepared, including resume, project stories, etc.
 
 ## Sample App
 ![question 1](imgs/do_you_have_experience_in_building_dashboards.png)
